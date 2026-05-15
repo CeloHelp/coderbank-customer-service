@@ -1,0 +1,28 @@
+server:
+  port: 8085
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/customer_db
+    username: postgres
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: validate   # troque por Flyway assim que criar as migrations
+    properties:
+      hibernate.format_sql: true
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true      # coloque true quando criar V1__init.sql
+
+management:
+  endpoints.web.exposure.include: health,info
+
+logging:
+  level:
+    root: INFO
+    com.coderbank.customer: DEBUG
+  pattern:
+    console: >
+      {"ts":"%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX}","level":"%p",
+       "logger":"%c{1}","msg":"%m","thread":"%t"}%n

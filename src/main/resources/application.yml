@@ -13,7 +13,7 @@ spring:
       hibernate.format_sql: true
       hibernate.jdbc.time_zone: UTC
   flyway:
-    enabled: true      # coloque true quando criar V1__init.sql
+    enabled: true     # coloque true quando criar V1__init.sql
 
 management:
   endpoints.web.exposure.include: health,info

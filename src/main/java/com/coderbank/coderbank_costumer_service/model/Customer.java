@@ -24,7 +24,7 @@ public class Customer {
     @CPF
     private String cpf;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     @Getter
     @Setter
     private String email;
@@ -33,6 +33,7 @@ public class Customer {
     @Getter
     @Setter
     private String address;
+
 
     // Construtores
     public Customer() {}

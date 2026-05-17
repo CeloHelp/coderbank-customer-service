@@ -18,6 +18,10 @@ spring:
 management:
   endpoints.web.exposure.include: health,info
 
+client:
+  post:
+    url: http://localhost:8082
+
 logging:
   level:
     root: INFO

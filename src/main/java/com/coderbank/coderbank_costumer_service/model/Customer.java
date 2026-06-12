@@ -22,9 +22,11 @@ public class Customer {
 
     @Column(nullable = false, unique = true, length = 11)
     @CPF
+    @Getter
+    @Setter
     private String cpf;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     @Getter
     @Setter
     private String email;
@@ -34,6 +36,7 @@ public class Customer {
     @Setter
     private String address;
 
+
     // Construtores
     public Customer() {}
 
@@ -42,5 +45,9 @@ public class Customer {
         this.cpf = cpf;
         this.email = email;
         this.address = address;
+    }
+
+    public static Customer fromDTO(com.coderbank.coderbank_costumer_service.dto.request.CustomerRequestDTO dto) {
+        return new Customer(dto.name(), dto.cpf(), dto.email(), dto.address());
     }
 }

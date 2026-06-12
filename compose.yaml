@@ -1,9 +1,21 @@
 services:
-  postgres:
-    image: 'postgres:latest'
+  coderbank-customer-db: # Nomeado como DB para clareza, já que a imagem é do Postgres
+    image: postgres:16
+    container_name: customer-db-container
     environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
+      POSTGRES_DB: customer_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
     ports:
-      - '5432'
+      - "5432:5432"
+    volumes:
+      - customer_data:/var/lib/postgresql/data # Sintaxe correta: "nome_do_volume:caminho_no_container"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d customer_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+volumes:
+  customer_data:

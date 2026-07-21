@@ -2,11 +2,11 @@ package com.coderbank.coderbank_costumer_service.service;
 
 import com.coderbank.coderbank_costumer_service.client.CustomerInterface;
 import com.coderbank.coderbank_costumer_service.client.dtoclient.request.RequestClient;
-import com.coderbank.coderbank_costumer_service.client.dtoclient.response.ResponseClient;
 import com.coderbank.coderbank_costumer_service.dto.request.CustomerRequestDTO;
-import com.coderbank.coderbank_costumer_service.dto.response.CustomerRespondeDTO;
+import com.coderbank.coderbank_costumer_service.dto.response.CustomerResponseDTO;
 import com.coderbank.coderbank_costumer_service.model.Customer;
 import com.coderbank.coderbank_costumer_service.repository.CustomerRepository;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,10 +20,11 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final CustomerInterface customerInterface;
 
+    @Retry(name = "customer-service", fallbackMethod = "createCustomerFallback")
     @Transactional
-    public CustomerRespondeDTO createCustomer(CustomerRequestDTO dto) {
+    public CustomerResponseDTO createCustomer(CustomerRequestDTO CustomerRequestDTO) {
         // 1. Cria a entidade a partir do DTO (lógica na entidade via factory method)
-        Customer customer = Customer.fromDTO(dto);
+        Customer customer = Customer.fromDTO(CustomerRequestDTO);
 
         // 2. Persiste no banco local
         customer = customerRepository.save(customer);
@@ -41,7 +42,7 @@ public class CustomerService {
         customerInterface.createAccount(requestClient);
 
         // 5. Retorna o DTO de resposta
-        return new CustomerRespondeDTO(
+        return new CustomerResponseDTO(
                 customer.getId().toString(),
                 customer.getName(),
                 customer.getCpf(),
@@ -50,8 +51,6 @@ public class CustomerService {
         );
     }
 
-    public ResponseClient sendTransaction(RequestClient request) {
-        return customerInterface.createTransaction(request);
-    }
+
 
 }

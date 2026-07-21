@@ -7,8 +7,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 @FeignClient(name = "transaction-service", url = "${client.post.url}")
 public interface CustomerInterface {
-    @PostMapping("/api/v1/transactions")
-    ResponseClient createTransaction(RequestClient requestClient);
 
     @PostMapping("/api/v1/accounts")
     ResponseClient createAccount(RequestClient requestClient);

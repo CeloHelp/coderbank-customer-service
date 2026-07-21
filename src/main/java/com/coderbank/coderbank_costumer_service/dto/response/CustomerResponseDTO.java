@@ -1,6 +1,6 @@
 package com.coderbank.coderbank_costumer_service.dto.response;
 
-public record CustomerRespondeDTO(
+public record CustomerResponseDTO(
         String id,
         String name,
         String cpf,

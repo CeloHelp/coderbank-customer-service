@@ -1,7 +1,7 @@
 package com.coderbank.coderbank_costumer_service.controller;
 
 import com.coderbank.coderbank_costumer_service.dto.request.CustomerRequestDTO;
-import com.coderbank.coderbank_costumer_service.dto.response.CustomerRespondeDTO;
+import com.coderbank.coderbank_costumer_service.dto.response.CustomerResponseDTO;
 import com.coderbank.coderbank_costumer_service.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ public class CustomerController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CustomerRespondeDTO create(@RequestBody @Valid CustomerRequestDTO requestDTO) {
+    public CustomerResponseDTO create(@RequestBody @Valid CustomerRequestDTO requestDTO) {
         return customerService.createCustomer(requestDTO);
     }
 }

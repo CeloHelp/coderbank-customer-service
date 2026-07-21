@@ -30,3 +30,23 @@ logging:
     console: >
       {"ts":"%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX}","level":"%p",
        "logger":"%c{1}","msg":"%m","thread":"%t"}%n
+
+resilience4j.circuitbreaker:
+    instances:
+      transactionServiceCircuitBreaker:
+        registerHealthIndicator: true
+        slidingWindowSize: 10 # Número de chamadas consideradas para o cálculo da taxa de falha
+        minimumNumberOfCalls: 5 # Número mínimo de chamadas para avaliar o desempenho
+        permittedNumberOfCallsInHalfOpenState: 2 # Número de chamadas permitidas no estado half-open
+        waitDurationInOpenState: 50s # Duração que o circuito permanece aberto antes de tentar fechar
+        failureRateThreshold: 50 # Limite da taxa de falha para abrir o circuito
+
+
+
+resilience4j.retry:
+    instances:
+      transactionServiceRetry:
+        maxAttempts: 2 # Número máximo de tentativas
+        waitDuration: 50ms  # Tempo de espera entre as tentativas
+#        retryExceptions:
+

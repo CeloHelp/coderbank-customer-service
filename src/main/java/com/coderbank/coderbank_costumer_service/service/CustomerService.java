@@ -2,6 +2,7 @@ package com.coderbank.coderbank_costumer_service.service;
 
 import com.coderbank.coderbank_costumer_service.client.CustomerInterface;
 import com.coderbank.coderbank_costumer_service.client.dtoclient.request.RequestClient;
+import com.coderbank.coderbank_costumer_service.client.dtoclient.response.ResponseClient;
 import com.coderbank.coderbank_costumer_service.dto.request.CustomerRequestDTO;
 import com.coderbank.coderbank_costumer_service.dto.response.CustomerResponseDTO;
 import com.coderbank.coderbank_costumer_service.model.Customer;
@@ -54,12 +55,35 @@ public class CustomerService {
                 customer.getEmail(),
                 customer.getAddress()
         );
+
+
+
+
+
     }
 
-    public String createCustomerFallback(CustomerRequestDTO CustomerRequestDTO) {
-        log.error("Falha ao criar cliente. Fallback acionado para o cliente: {}", CustomerRequestDTO);
-        return "Falha ao criar cliente. Por favor, tente novamente mais tarde.";
+    public CustomerResponseDTO createCustomerFallback(CustomerRequestDTO CustomerRequestDTO,  Exception exception) {
+        log.error("Erro ao criar cliente: {}", exception.getMessage());
+
+        // Retorna uma resposta padrão ou vazia
+
+
+        return new CustomerResponseDTO(
+                null,
+                CustomerRequestDTO.getName(),
+                CustomerRequestDTO.getCpf(),
+                CustomerRequestDTO.getEmail(),
+                CustomerRequestDTO.getAddress()
+        );
+
     }
+
+
+
+
+
+
+
 
 
 

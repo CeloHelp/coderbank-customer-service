@@ -2,7 +2,6 @@ package com.coderbank.coderbank_costumer_service.service;
 
 import com.coderbank.coderbank_costumer_service.client.CustomerInterface;
 import com.coderbank.coderbank_costumer_service.client.dtoclient.request.RequestClient;
-import com.coderbank.coderbank_costumer_service.client.dtoclient.response.ResponseClient;
 import com.coderbank.coderbank_costumer_service.dto.request.CustomerRequestDTO;
 import com.coderbank.coderbank_costumer_service.dto.response.CustomerResponseDTO;
 import com.coderbank.coderbank_costumer_service.model.Customer;
@@ -12,9 +11,11 @@ import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -24,8 +25,8 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final CustomerInterface customerInterface;
 
-    @Retry(name = "customer-service", fallbackMethod = "createCustomerFallback")
-    @CircuitBreaker(name = "customer-service", fallbackMethod = "createCustomerFallback")
+    @Retry(name = "transactionServiceRetry", fallbackMethod = "createCustomerFallback")
+    @CircuitBreaker(name = "transactionServiceCircuitBreaker", fallbackMethod = "createCustomerFallback")
     @Transactional
     public CustomerResponseDTO createCustomer(CustomerRequestDTO CustomerRequestDTO) {
         // 1. Cria a entidade a partir do DTO (lógica na entidade via factory method)
@@ -60,22 +61,28 @@ public class CustomerService {
 
 
 
+
     }
 
-    public CustomerResponseDTO createCustomerFallback(CustomerRequestDTO CustomerRequestDTO,  Exception exception) {
-        log.error("Erro ao criar cliente: {}", exception.getMessage());
+    private CustomerResponseDTO createCustomerFallback(CustomerRequestDTO request, Throwable cause)
 
-        // Retorna uma resposta padrão ou vazia
+    {
+        log.error("Falha ao criar cliente: {}.", request);
 
 
-        return new CustomerResponseDTO(
-                null,
-                CustomerRequestDTO.getName(),
-                CustomerRequestDTO.getCpf(),
-                CustomerRequestDTO.getEmail(),
-                CustomerRequestDTO.getAddress()
-        );
+       return null;
 
+
+    }
+
+
+
+
+    public List<Customer> getAllCustomers() {
+
+        log.info("Listando clientes: {}", customerRepository.findAll());
+
+        return customerRepository.findAll();
     }
 
 

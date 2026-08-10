@@ -24,8 +24,9 @@ client:
 
 logging:
   level:
+    io.github.resilience4j: DEBUG
     root: INFO
-    com.coderbank.customer: DEBUG
+    com.coderbank.customer: ERROR
   pattern:
     console: >
       {"ts":"%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX}","level":"%p",

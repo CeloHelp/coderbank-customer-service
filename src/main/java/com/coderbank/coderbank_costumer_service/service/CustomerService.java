@@ -4,6 +4,7 @@ import com.coderbank.coderbank_costumer_service.client.CustomerInterface;
 import com.coderbank.coderbank_costumer_service.client.dtoclient.request.RequestClient;
 import com.coderbank.coderbank_costumer_service.dto.request.CustomerRequestDTO;
 import com.coderbank.coderbank_costumer_service.dto.response.CustomerResponseDTO;
+import com.coderbank.coderbank_costumer_service.exceptions.TransactionServiceUnavaliableException;
 import com.coderbank.coderbank_costumer_service.model.Customer;
 import com.coderbank.coderbank_costumer_service.repository.CustomerRepository;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -69,9 +70,8 @@ public class CustomerService {
     {
         log.error("Falha ao criar cliente: {}.", request);
 
-
-       return null;
-
+        throw new TransactionServiceUnavaliableException("Serviço de transações indisponível. Tente novamente mais tarde.",
+                cause);
 
     }
 

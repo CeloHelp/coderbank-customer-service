@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler extends RuntimeException {
 
-    @ExceptionHandler(TransactionServiceUnavaliableException.class)
-    public ResponseEntity<ApiErrorResponse> handleTransactionServiceUnavaliableException(TransactionServiceUnavaliableException ex) {
+    @ExceptionHandler(TransactionServiceUnavailableException.class)
+    public ResponseEntity<ApiErrorResponse> handleTransactionServiceUnavaliableException(TransactionServiceUnavailableException ex) {
         ApiErrorResponse errorResponse = new ApiErrorResponse(
                 503,
                 "Service Unavailable",

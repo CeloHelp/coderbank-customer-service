@@ -1,18 +1,14 @@
 package com.coderbank.coderbank_costumer_service.service;
 
-import com.coderbank.coderbank_costumer_service.client.CustomerInterface;
+import com.coderbank.coderbank_costumer_service.client.AccountGateway;
 import com.coderbank.coderbank_costumer_service.client.dtoclient.request.RequestClient;
 import com.coderbank.coderbank_costumer_service.dto.request.CustomerRequestDTO;
 import com.coderbank.coderbank_costumer_service.dto.response.CustomerResponseDTO;
-import com.coderbank.coderbank_costumer_service.exceptions.TransactionServiceUnavaliableException;
 import com.coderbank.coderbank_costumer_service.model.Customer;
 import com.coderbank.coderbank_costumer_service.repository.CustomerRepository;
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -24,10 +20,8 @@ import java.util.List;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
-    private final CustomerInterface customerInterface;
+    private final AccountGateway accountGateway;
 
-    @Retry(name = "transactionServiceRetry", fallbackMethod = "createCustomerFallback")
-    @CircuitBreaker(name = "transactionServiceCircuitBreaker", fallbackMethod = "createCustomerFallback")
     @Transactional
     public CustomerResponseDTO createCustomer(CustomerRequestDTO CustomerRequestDTO) {
         // 1. Cria a entidade a partir do DTO (lógica na entidade via factory method)
@@ -46,8 +40,8 @@ public class CustomerService {
         );
 
         // 4. Chamada síncrona via Feign
-        log.info(" Cliente enviado com sucesso: {}", requestClient);
-        customerInterface.createAccount(requestClient);
+        accountGateway.createAccount(requestClient);
+        log.info("Conta solicitada com sucesso para o cliente {}.", customer.getId());
 
         // 5. Retorna o DTO de resposta
         return new CustomerResponseDTO(
@@ -65,25 +59,14 @@ public class CustomerService {
 
     }
 
-    private CustomerResponseDTO createCustomerFallback(CustomerRequestDTO request, Throwable cause)
-
-    {
-        log.error("Falha ao criar cliente: {}.", request);
-
-        throw new TransactionServiceUnavaliableException("Serviço de transações indisponível. Tente novamente mais tarde.",
-                cause);
-
-    }
-
-
-
-
     public List<Customer> getAllCustomers() {
 
         log.info("Listando clientes: {}", customerRepository.findAll());
 
         return customerRepository.findAll();
     }
+
+
 
 
 

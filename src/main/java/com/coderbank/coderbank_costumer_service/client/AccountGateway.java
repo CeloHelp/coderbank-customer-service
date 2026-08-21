@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -18,11 +20,15 @@ public class AccountGateway {
 
     @Retry(name = "transactionServiceRetry", fallbackMethod = "createAccountFallback")
     @CircuitBreaker(name = "transactionServiceCircuitBreaker")
-    public ResponseClient createAccount(RequestClient request) {
-        return customerInterface.createAccount(request);
+    public ResponseClient createAccount(UUID idempotencyKey, RequestClient request) {
+        return customerInterface.createAccount(idempotencyKey, request);
     }
 
-    private ResponseClient createAccountFallback(RequestClient request, Throwable cause) {
+    private ResponseClient createAccountFallback(
+            UUID idempotencyKey,
+            RequestClient request,
+            Throwable cause
+    ) {
         log.error("Falha ao criar conta para o cliente {}.", request.customerId(), cause);
         throw new TransactionServiceUnavailableException(
                 "Serviço de transações indisponível. Tente novamente mais tarde.",

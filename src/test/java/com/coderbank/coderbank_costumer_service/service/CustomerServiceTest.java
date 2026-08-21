@@ -1,6 +1,7 @@
 package com.coderbank.coderbank_costumer_service.service;
 
 import com.coderbank.coderbank_costumer_service.client.AccountGateway;
+import com.coderbank.coderbank_costumer_service.client.dtoclient.AccountType;
 import com.coderbank.coderbank_costumer_service.client.dtoclient.request.RequestClient;
 import com.coderbank.coderbank_costumer_service.dto.request.CustomerRequestDTO;
 import com.coderbank.coderbank_costumer_service.exceptions.TransactionServiceUnavailableException;
@@ -15,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -50,34 +52,55 @@ class CustomerServiceTest {
                 "Rua Principal, 100"
         );
 
-        when(customerRepository.save(any(Customer.class))).thenAnswer(invocation -> {
-            Customer customer = invocation.getArgument(0);
-            ReflectionTestUtils.setField(customer, "id", CUSTOMER_ID);
-            return customer;
-        });
     }
 
     @Test
     void shouldPersistCustomerAndRequestAccountCreation() {
+        stubSavedCustomer();
+
         var response = customerService.createCustomer(request);
 
+        ArgumentCaptor<UUID> idempotencyKey = ArgumentCaptor.forClass(UUID.class);
         ArgumentCaptor<RequestClient> accountRequest = ArgumentCaptor.forClass(RequestClient.class);
         verify(customerRepository).save(any(Customer.class));
-        verify(accountGateway).createAccount(accountRequest.capture());
+        verify(accountGateway).createAccount(idempotencyKey.capture(), accountRequest.capture());
 
         assertThat(response.id()).isEqualTo(CUSTOMER_ID.toString());
+        assertThat(idempotencyKey.getValue()).isNotNull();
         assertThat(accountRequest.getValue().customerId()).isEqualTo(CUSTOMER_ID);
+        assertThat(accountRequest.getValue().accountType()).isEqualTo(AccountType.CHECKING);
+        assertThat(accountRequest.getValue().currency()).isEqualTo("BRL");
     }
 
     @Test
     void shouldNotRepeatCustomerPersistenceWhenAccountGatewayFails() {
+        stubSavedCustomer();
+
         var failure = new TransactionServiceUnavailableException("Serviço indisponível");
-        doThrow(failure).when(accountGateway).createAccount(any(RequestClient.class));
+        doThrow(failure).when(accountGateway).createAccount(any(UUID.class), any(RequestClient.class));
 
         assertThatThrownBy(() -> customerService.createCustomer(request))
                 .isSameAs(failure);
 
         verify(customerRepository, times(1)).save(any(Customer.class));
-        verify(accountGateway, times(1)).createAccount(any(RequestClient.class));
+        verify(accountGateway, times(1)).createAccount(any(UUID.class), any(RequestClient.class));
+    }
+
+    @Test
+    void shouldListCustomersWithSingleRepositoryQuery() {
+        List<Customer> customers = List.of(Customer.fromDTO(request));
+        when(customerRepository.findAll()).thenReturn(customers);
+
+        assertThat(customerService.getAllCustomers()).isSameAs(customers);
+
+        verify(customerRepository, times(1)).findAll();
+    }
+
+    private void stubSavedCustomer() {
+        when(customerRepository.save(any(Customer.class))).thenAnswer(invocation -> {
+            Customer customer = invocation.getArgument(0);
+            ReflectionTestUtils.setField(customer, "id", CUSTOMER_ID);
+            return customer;
+        });
     }
 }
